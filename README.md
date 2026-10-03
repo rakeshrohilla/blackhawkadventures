@@ -74,6 +74,7 @@ admin@blackhawkadventures.com / blackhawk-admin-2026
 | --- | --- |
 | `npm run dev` | Development server |
 | `npm run build` / `npm start` | Production build and server |
+| `npm run vercel-build` | What Vercel runs: migrate, then build |
 | `npm run typecheck` / `npm run lint` | TypeScript and ESLint |
 | `npm run db:migrate` | Create and apply a migration (dev) |
 | `npm run db:deploy` | Apply existing migrations (production) |
@@ -145,8 +146,9 @@ Any Node host works. Two sensible options:
 
 **Vercel + managed Postgres (Neon or Supabase)** — least work, scales on its own.
 Push the repo, set the environment variables, point `DATABASE_URL` at the pooled
-connection string. `npm run build` runs `prisma generate` automatically; run
-`npm run db:deploy` once to apply migrations.
+connection string. Vercel picks up the `vercel-build` script, which applies any
+pending database migrations before building — so a deploy never runs against an
+out-of-date schema and you never have to run migrations by hand.
 
 **A VPS you control** (including a Hostinger VPS — not shared hosting, which cannot
 run Node):
