@@ -1,0 +1,231 @@
+// Black Hawk Adventures — data model
+// Postgres + Prisma. Run `npm run db:migrate` after editing.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+enum Difficulty {
+  EASY
+  MODERATE
+  CHALLENGING
+  EXPERT
+}
+
+enum DepartureStatus {
+  SCHEDULED
+  GUARANTEED
+  FULL
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  UNPAID
+  DEPOSIT_PAID
+  PAID
+  REFUNDED
+}
+
+enum EnquiryStatus {
+  NEW
+  IN_PROGRESS
+  CLOSED
+}
+
+/// Staff accounts for the admin panel.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(EDITOR)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/// A sellable expedition.
+model Tour {
+  id             String     @id @default(cuid())
+  slug           String     @unique
+  title          String
+  tagline        String
+  summary        String
+  description    String
+  region         String
+  difficulty     Difficulty @default(MODERATE)
+  durationDays   Int
+  groupSizeMax   Int        @default(12)
+  minAge         Int?
+  basePriceCents Int
+  currency       String     @default("USD")
+  heroImageUrl   String?
+  /// Fallback artwork variant used when no photography is set.
+  artVariant     String     @default("peaks")
+  /// string[]
+  highlights     Json       @default("[]")
+  /// string[]
+  inclusions     Json       @default("[]")
+  /// string[]
+  exclusions     Json       @default("[]")
+  /// string[] of image URLs
+  gallery        Json       @default("[]")
+  featured       Boolean    @default(false)
+  published      Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  itinerary  ItineraryDay[]
+  departures Departure[]
+  enquiries  Enquiry[]
+  reviews    Review[]
+
+  @@index([published, featured])
+  @@index([region])
+  @@index([difficulty])
+}
+
+model ItineraryDay {
+  id         String  @id @default(cuid())
+  tourId     String
+  dayNumber  Int
+  title      String
+  body       String
+  distanceKm Float?
+  altitudeM  Int?
+  stay       String?
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([tourId, dayNumber])
+  @@index([tourId])
+}
+
+/// A dated instance of a tour that guests actually book.
+model Departure {
+  id          String          @id @default(cuid())
+  tourId      String
+  startDate   DateTime
+  endDate     DateTime
+  capacity    Int             @default(12)
+  seatsBooked Int             @default(0)
+  /// Overrides Tour.basePriceCents when set.
+  priceCents  Int?
+  status      DepartureStatus @default(SCHEDULED)
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  tour     Tour      @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([tourId, startDate])
+  @@index([startDate])
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  reference   String        @unique
+  departureId String
+  /// Snapshot so historical bookings survive tour edits.
+  tourTitle   String
+  tourSlug    String
+  startDate   DateTime
+  guests      Int
+  unitPriceCents Int
+  totalCents  Int
+  currency    String        @default("USD")
+  status      BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  customerCountry String?
+  notes           String?
+  internalNotes   String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+
+  departure  Departure      @relation(fields: [departureId], references: [id])
+  travellers BookingGuest[]
+
+  @@index([status])
+  @@index([customerEmail])
+  @@index([createdAt])
+  @@index([departureId])
+}
+
+model BookingGuest {
+  id               String  @id @default(cuid())
+  bookingId        String
+  fullName         String
+  age              Int?
+  dietary          String?
+  emergencyContact String?
+  isLead           Boolean @default(false)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+}
+
+model Enquiry {
+  name      String
+  id        String        @id @default(cuid())
+  email     String
+  phone     String?
+  tourId    String?
+  subject   String?
+  message   String
+  status    EnquiryStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  handledAt DateTime?
+
+  tour Tour? @relation(fields: [tourId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Review {
+  id             String   @id @default(cuid())
+  tourId         String?
+  authorName     String
+  authorLocation String?
+  rating         Int      @default(5)
+  body           String
+  published      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  tour Tour? @relation(fields: [tourId], references: [id], onDelete: SetNull)
+
+  @@index([published])
+}
+
+/// Editable site-wide values (contact details, hero copy).
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

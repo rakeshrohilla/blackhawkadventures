@@ -1,0 +1,53 @@
+{
+  "name": "blackhawk-adventures",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Black Hawk Adventures \u2014 adventure tours website, booking engine and admin panel",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset --force",
+    "postinstall": "prisma generate",
+    "staff:list": "tsx scripts/staff.ts list",
+    "staff:add": "tsx scripts/staff.ts add",
+    "staff:password": "tsx scripts/staff.ts password",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.0.11",
+    "next": "16.3.8",
+    "pg": "^8.16.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.15.0",
+    "@types/pg": "^8.15.4",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "dotenv": "^17.2.0",
+    "eslint": "^9.30.0",
+    "eslint-config-next": "16.3.8",
+    "playwright": "^1.63.0",
+    "prisma": "7.10.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
