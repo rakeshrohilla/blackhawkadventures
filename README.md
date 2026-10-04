@@ -44,7 +44,8 @@ No CMS, no jQuery, no plugins.
 
 ## Running it locally
 
-Requirements: Node 20.9+ and a PostgreSQL 14+ database.
+Requirements: Node 20.9+ (Node 22 LTS recommended — one Prisma dependency warns
+on older versions) and a PostgreSQL 14+ database.
 
 ```bash
 git clone <this repo>
@@ -144,7 +145,12 @@ Postgres connection limit will not survive serverless scale-out.
 
 Any Node host works. Two sensible options:
 
-**Vercel + managed Postgres (Neon or Supabase)** — least work, scales on its own.
+`DATABASE_URL` accepts either a normal Postgres connection string
+(`postgresql://…`, e.g. Neon, Supabase, RDS, a local server) or a Prisma Postgres /
+Accelerate URL (`prisma+postgres://…`, which is what Vercel's Prisma Postgres
+integration injects). The client picks the right connection mode from the scheme.
+
+**Vercel + managed Postgres (Neon, Supabase or Prisma Postgres)** — least work, scales on its own.
 Push the repo, set the environment variables, point `DATABASE_URL` at the pooled
 connection string. Vercel picks up the `vercel-build` script, which applies any
 pending database migrations before building — so a deploy never runs against an
