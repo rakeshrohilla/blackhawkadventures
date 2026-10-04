@@ -1,14 +1,10 @@
 import "dotenv/config";
 
-import { PrismaPg } from "@prisma/adapter-pg";
 import { hashSync } from "bcryptjs";
 
-import { PrismaClient } from "../src/generated/prisma/client";
+import { createPrismaClient } from "../src/lib/prisma-factory";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) throw new Error("DATABASE_URL is not set");
-
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+const prisma = createPrismaClient(process.env.DATABASE_URL);
 
 const utc = (year: number, month: number, day: number) => new Date(Date.UTC(year, month - 1, day));
 const rupees = (amount: number) => amount * 100;

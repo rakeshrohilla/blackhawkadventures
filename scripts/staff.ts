@@ -13,15 +13,11 @@ import "dotenv/config";
 import { createInterface } from "node:readline/promises";
 import { randomBytes } from "node:crypto";
 
-import { PrismaPg } from "@prisma/adapter-pg";
 import { hashSync } from "bcryptjs";
 
-import { PrismaClient } from "../src/generated/prisma/client";
+import { createPrismaClient } from "../src/lib/prisma-factory";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) throw new Error("DATABASE_URL is not set");
-
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+const prisma = createPrismaClient(process.env.DATABASE_URL);
 
 async function askPassword(prompt: string): Promise<string> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
