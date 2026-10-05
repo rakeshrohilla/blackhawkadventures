@@ -10,6 +10,7 @@ import {
 } from "@/components/admin/Ui";
 import { seatsLeft } from "@/lib/booking";
 import { prisma } from "@/lib/db";
+import { siteIsIndexable } from "@/lib/seo";
 import { formatDate, formatDateRange, formatMoney } from "@/lib/format";
 
 export default async function AdminDashboard() {
@@ -55,8 +56,24 @@ export default async function AdminDashboard() {
     }),
   ]);
 
+  const indexable = siteIsIndexable();
+
   return (
     <div className="space-y-10">
+      {!indexable ? (
+        <div className="rounded-xl border border-ember/30 bg-ember-tint px-5 py-4">
+          <p className="font-display text-sm font-semibold text-ember-dark">
+            Hidden from search engines
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-ink-600">
+            Google and other crawlers are blocked, so this site will not appear in search
+            results. Anyone with the link can still visit it. Set{" "}
+            <code className="font-mono text-xs">SITE_INDEXABLE=true</code> in your hosting
+            environment variables and redeploy once the content is real.
+          </p>
+        </div>
+      ) : null}
+
       <PageHeader
         title="Dashboard"
         subtitle="Everything that needs a human today."

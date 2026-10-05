@@ -23,6 +23,18 @@ from the admin panel at `/admin`.
 | `/about`, `/contact` | Company pages, enquiry form, FAQs |
 | `/sitemap.xml`, `/robots.txt` | Generated from the database |
 
+### Search engine visibility
+
+The site is **hidden from search engines unless `SITE_INDEXABLE` is exactly `true`**.
+While it is off, `robots.txt` disallows everything, every page carries a `noindex,
+nofollow` meta tag, and responses carry an `X-Robots-Tag` header — belt and braces,
+because a half-finished site getting indexed is painful to undo. The admin dashboard
+shows a banner the whole time it is off, so it cannot be left that way by accident.
+
+Flip it on by setting `SITE_INDEXABLE=true` in your host's environment variables and
+redeploying. Note this hides the site from search; it does not make it private —
+anyone with the URL can still visit.
+
 **Admin panel** (`/admin`, staff only)
 
 Dashboard with live figures · bookings list and detail (status, payment status,
